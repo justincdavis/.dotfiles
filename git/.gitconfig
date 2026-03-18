@@ -1,0 +1,25 @@
+[user]
+	email = davisjustin302@gmail.com
+	name = justincdavis
+
+[credential]
+	helper = store
+
+[init]
+	defaultBranch = main
+
+[pull]
+	rebase = true
+
+[push]
+	autoSetupRemote = true
+
+[core]
+	editor = vim
+
+[alias]
+	st = status
+	co = checkout
+	br = branch
+	ci = commit
+	lg = log --oneline --graph --decorate --all
