@@ -1,42 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# =============================================================================
-# Block management helpers
-# =============================================================================
-
-# Insert or replace a block delimited by BEGIN-AUTO / END-AUTO markers in a file.
-# Usage: manage_block <file> <block_name> <content>
-manage_block() {
-    local file="$1"
-    local name="$2"
-    local content="$3"
-    local begin="# BEGIN-AUTO: ${name}"
-    local end="# END-AUTO: ${name}"
-
-    # Ensure the file exists
-    touch "$file"
-
-    if grep -qF "$begin" "$file"; then
-        # Replace existing block (sed in-place)
-        # Delete from BEGIN to END, then insert new content at that position
-        local tmp
-        tmp=$(mktemp)
-        awk -v begin="$begin" -v end="$end" -v content="$content" '
-            $0 == begin { print content; skip=1; next }
-            $0 == end   { skip=0; next }
-            !skip       { print }
-        ' "$file" > "$tmp"
-        mv "$tmp" "$file"
-        echo "  Updated block: ${name} in ${file}"
-    else
-        # Append new block
-        printf '\n%s\n%s\n%s\n' "$begin" "$content" "$end" >> "$file"
-        echo "  Added block: ${name} to ${file}"
-    fi
-}
+DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # =============================================================================
 # Usage
@@ -47,12 +12,13 @@ usage() {
 Usage: install.sh [options]
 
 Options:
-  --only <name>   Run only the named installer (e.g., starship)
+  --only <name>   Run only the named step (stow, starship)
   -h, --help      Show this help
 
 Examples:
   install.sh                    # install everything
   install.sh --only starship    # install only starship
+  install.sh --only stow        # only stow symlinks
 EOF
     exit 1
 }
@@ -74,25 +40,106 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-# =============================================================================
-# Installers
-# =============================================================================
-
 should_run() {
     [[ -z "$ONLY" || "$ONLY" == "$1" ]]
 }
 
-BASHRC="${HOME}/.bashrc"
+# =============================================================================
+# Install dependencies
+# =============================================================================
 
-# --- Starship ---
+if should_run "deps"; then
+    echo ""
+    echo "=== Dependencies ==="
+
+    if command -v stow &>/dev/null; then
+        echo "stow: already installed"
+    else
+        echo "stow: installing..."
+        if command -v apt-get &>/dev/null; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq stow
+        elif command -v dnf &>/dev/null; then
+            sudo dnf install -y stow
+        elif command -v pacman &>/dev/null; then
+            sudo pacman -S --noconfirm stow
+        elif command -v brew &>/dev/null; then
+            brew install stow
+        else
+            echo "ERROR: Could not find a package manager to install stow"
+            exit 1
+        fi
+        echo "stow: installed"
+    fi
+fi
+
+# =============================================================================
+# Starship
+# =============================================================================
 
 if should_run "starship"; then
     echo ""
     echo "=== Starship ==="
-    bash "$SCRIPT_DIR/scripts/install_starship.sh"
+    bash "$DOTFILES_DIR/scripts/install_starship.sh"
+fi
 
-    STARSHIP_BLOCK='eval "$(starship init bash)"'
-    manage_block "$BASHRC" "starship" "$STARSHIP_BLOCK"
+# =============================================================================
+# Stow packages
+# =============================================================================
+
+if should_run "stow"; then
+    echo ""
+    echo "=== Stow symlinks ==="
+
+    # Back up existing files before stow replaces them
+    BACKUP_DIR="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
+    NEEDS_BACKUP=false
+    for f in .bashrc .bash_aliases .gitconfig .config/starship.toml; do
+        if [ -f "$HOME/$f" ] && [ ! -L "$HOME/$f" ]; then
+            NEEDS_BACKUP=true
+            break
+        fi
+    done
+    if $NEEDS_BACKUP; then
+        mkdir -p "$BACKUP_DIR"
+        for f in .bashrc .bash_aliases .gitconfig .config/starship.toml; do
+            if [ -f "$HOME/$f" ] && [ ! -L "$HOME/$f" ]; then
+                mkdir -p "$BACKUP_DIR/$(dirname "$f")"
+                cp "$HOME/$f" "$BACKUP_DIR/$f"
+                echo "  backed up: ~/$f -> $BACKUP_DIR/$f"
+            fi
+        done
+    fi
+
+    PACKAGES=(bash starship git)
+
+    for pkg in "${PACKAGES[@]}"; do
+        if [ ! -d "$DOTFILES_DIR/$pkg" ]; then
+            echo "  $pkg: package dir not found, skipping"
+            continue
+        fi
+
+        # Adopt existing files so stow doesn't conflict, then restow
+        echo "  $pkg: stowing..."
+        stow -d "$DOTFILES_DIR" -t "$HOME" --adopt "$pkg"
+        # Restow to ensure dotfiles repo version wins
+        # (adopt pulls existing files into repo, restow overwrites with repo version)
+        git -C "$DOTFILES_DIR" checkout -- "$pkg/"
+        stow -d "$DOTFILES_DIR" -t "$HOME" -R "$pkg"
+        echo "  $pkg: done"
+    done
+fi
+
+# =============================================================================
+# Copy template files (not stowed — user edits per machine)
+# =============================================================================
+
+if should_run "stow"; then
+    if [ ! -f "$HOME/.bashrc_local" ]; then
+        cp "$DOTFILES_DIR/templates/bashrc_local" "$HOME/.bashrc_local"
+        echo "  Created ~/.bashrc_local from template — edit for this machine"
+    else
+        echo "  ~/.bashrc_local already exists, skipping"
+    fi
 fi
 
 # =============================================================================
@@ -100,4 +147,7 @@ fi
 # =============================================================================
 
 echo ""
-echo "Done."
+echo "Done. Restart your shell or run: source ~/.bashrc"
+if $NEEDS_BACKUP 2>/dev/null; then
+    echo "  Backups saved to: $BACKUP_DIR"
+fi
