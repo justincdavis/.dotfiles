@@ -13,10 +13,12 @@ Usage: install.sh [options]
 
 Options:
   --only <name>   Run only the named step (stow, starship)
+  --cuda          Add CUDA paths to ~/.bashrc_local
   -h, --help      Show this help
 
 Examples:
   install.sh                    # install everything
+  install.sh --cuda             # install everything + CUDA paths
   install.sh --only starship    # install only starship
   install.sh --only stow        # only stow symlinks
 EOF
@@ -28,12 +30,14 @@ EOF
 # =============================================================================
 
 ONLY=""
+CUDA=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --only)
             [[ $# -lt 2 ]] && { echo "ERROR: --only requires a name"; usage; }
             ONLY="$2"; shift ;;
+        --cuda) CUDA=true ;;
         -h|--help) usage ;;
         *) echo "ERROR: Unknown argument: $1"; usage ;;
     esac
@@ -139,6 +143,27 @@ if should_run "stow"; then
         echo "  Created ~/.bashrc_local from template — edit for this machine"
     else
         echo "  ~/.bashrc_local already exists, skipping"
+    fi
+fi
+
+# =============================================================================
+# CUDA (optional)
+# =============================================================================
+
+if $CUDA; then
+    BASHRC_LOCAL="$HOME/.bashrc_local"
+    CUDA_BLOCK='# --- CUDA ---
+if [ -d /usr/local/cuda ]; then
+    export CUDA_HOME=/usr/local/cuda
+    export PATH="${CUDA_HOME}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64:${LD_LIBRARY_PATH:-}"
+fi'
+
+    if grep -qF "CUDA_HOME" "$BASHRC_LOCAL" 2>/dev/null; then
+        echo "  cuda: already in ~/.bashrc_local, skipping"
+    else
+        printf '\n%s\n' "$CUDA_BLOCK" >> "$BASHRC_LOCAL"
+        echo "  cuda: added CUDA paths to ~/.bashrc_local"
     fi
 fi
 

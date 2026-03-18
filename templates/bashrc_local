@@ -1,13 +1,6 @@
 # ~/.bashrc_local — machine-specific config
 # This file is NOT managed by stow. Edit freely for this machine.
 
-# --- CUDA ---
-if [ -d /usr/local/cuda ]; then
-    export CUDA_HOME=/usr/local/cuda
-    export PATH="${CUDA_HOME}/bin:${PATH}"
-    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64:${LD_LIBRARY_PATH:-}"
-fi
-
 # --- NVM ---
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
