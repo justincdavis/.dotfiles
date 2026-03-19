@@ -108,6 +108,8 @@ if should_run "stow"; then
     # Back up existing files before stow replaces them
     BACKUP_DIR="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
     NEEDS_BACKUP=false
+    CONFIGS_DIR="$DOTFILES_DIR/configs"
+
     for f in .bashrc .bash_aliases .gitconfig .config/starship.toml .config/alacritty/alacritty.toml; do
         if [ -f "$HOME/$f" ] && [ ! -L "$HOME/$f" ]; then
             NEEDS_BACKUP=true
@@ -128,18 +130,18 @@ if should_run "stow"; then
     PACKAGES=(bash starship git alacritty)
 
     for pkg in "${PACKAGES[@]}"; do
-        if [ ! -d "$DOTFILES_DIR/$pkg" ]; then
+        if [ ! -d "$CONFIGS_DIR/$pkg" ]; then
             echo "  $pkg: package dir not found, skipping"
             continue
         fi
 
         # Adopt existing files so stow doesn't conflict, then restow
         echo "  $pkg: stowing..."
-        stow -d "$DOTFILES_DIR" -t "$HOME" --adopt "$pkg"
+        stow -d "$CONFIGS_DIR" -t "$HOME" --adopt "$pkg"
         # Restow to ensure dotfiles repo version wins
         # (adopt pulls existing files into repo, restow overwrites with repo version)
-        git -C "$DOTFILES_DIR" checkout -- "$pkg/"
-        stow -d "$DOTFILES_DIR" -t "$HOME" -R "$pkg"
+        git -C "$DOTFILES_DIR" checkout -- "configs/$pkg/"
+        stow -d "$CONFIGS_DIR" -t "$HOME" -R "$pkg"
         echo "  $pkg: done"
     done
 fi
