@@ -12,7 +12,7 @@ usage() {
 Usage: install.sh [options]
 
 Options:
-  --only <name>   Run only the named step (stow, starship)
+  --only <name>   Run only the named step (stow, starship, deps)
   --cuda          Add CUDA paths to ~/.bashrc_local
   -h, --help      Show this help
 
@@ -84,6 +84,17 @@ if should_run "starship"; then
     echo ""
     echo "=== Starship ==="
     bash "$DOTFILES_DIR/scripts/install_starship.sh"
+    bash "$DOTFILES_DIR/scripts/install_nerd_font.sh"
+fi
+
+# =============================================================================
+# Alacritty
+# =============================================================================
+
+if should_run "alacritty"; then
+    echo ""
+    echo "=== Alacritty ==="
+    bash "$DOTFILES_DIR/scripts/install_alacritty.sh"
 fi
 
 # =============================================================================
@@ -97,7 +108,7 @@ if should_run "stow"; then
     # Back up existing files before stow replaces them
     BACKUP_DIR="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
     NEEDS_BACKUP=false
-    for f in .bashrc .bash_aliases .gitconfig .config/starship.toml; do
+    for f in .bashrc .bash_aliases .gitconfig .config/starship.toml .config/alacritty/alacritty.toml; do
         if [ -f "$HOME/$f" ] && [ ! -L "$HOME/$f" ]; then
             NEEDS_BACKUP=true
             break
@@ -105,7 +116,7 @@ if should_run "stow"; then
     done
     if $NEEDS_BACKUP; then
         mkdir -p "$BACKUP_DIR"
-        for f in .bashrc .bash_aliases .gitconfig .config/starship.toml; do
+        for f in .bashrc .bash_aliases .gitconfig .config/starship.toml .config/alacritty/alacritty.toml; do
             if [ -f "$HOME/$f" ] && [ ! -L "$HOME/$f" ]; then
                 mkdir -p "$BACKUP_DIR/$(dirname "$f")"
                 cp "$HOME/$f" "$BACKUP_DIR/$f"
@@ -114,7 +125,7 @@ if should_run "stow"; then
         done
     fi
 
-    PACKAGES=(bash starship git)
+    PACKAGES=(bash starship git alacritty)
 
     for pkg in "${PACKAGES[@]}"; do
         if [ ! -d "$DOTFILES_DIR/$pkg" ]; then

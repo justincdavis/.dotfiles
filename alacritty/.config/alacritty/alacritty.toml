@@ -1,0 +1,23 @@
+# Alacritty terminal config
+
+[font]
+size = 12.0
+
+[font.normal]
+family = "JetBrainsMono Nerd Font"
+style = "Regular"
+
+[font.bold]
+family = "JetBrainsMono Nerd Font"
+style = "Bold"
+
+[font.italic]
+family = "JetBrainsMono Nerd Font"
+style = "Italic"
+
+[window]
+padding = { x = 8, y = 8 }
+dynamic_padding = true
+
+[scrolling]
+history = 10000

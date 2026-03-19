@@ -1,33 +1,235 @@
-# Starship prompt config
+# Starship prompt config - Pastel Powerline
 # https://starship.rs/config/
 
+palette = "pastel"
+
 format = """
+[](red)\
+$os\
+[](fg:red bg:orange)\
 $directory\
+[](fg:orange bg:yellow)\
+[ ](bg:yellow)\
 $git_branch\
 $git_status\
-$python\
-$nodejs\
-$rust\
+[](fg:yellow bg:green)\
+[ ](bg:green)\
+$c\
 $golang\
+$nodejs\
+$python\
+$rust\
+$java\
 $docker_context\
+[](fg:green bg:blue)\
+$time\
+[](fg:blue bg:violet)\
+[ ](bg:violet)\
 $cmd_duration\
-$line_break\
-$character"""
+[](fg:violet) \
+$character\
+"""
+
+# =============================================================================
+# Color Schemes — change palette above to switch, format stays the same
+# =============================================================================
+
+# Slot names (red, orange, yellow, green, blue, violet) are just segment
+# positions — they don't have to be those actual colors!
+
+[palettes.pastel]           # soft rainbow
+red = "#E8A0BF"
+orange = "#E8C0A0"
+yellow = "#E8DBA0"
+green = "#A0E8B8"
+blue = "#A0C8E8"
+violet = "#C0A0E8"
+text = "#1E1E2E"
+
+[palettes.ocean]            # deep sea to shore
+red = "#0D3B66"
+orange = "#1B6B93"
+yellow = "#3BACB6"
+green = "#82DBD8"
+blue = "#B3E8E5"
+violet = "#D4F1F4"
+text = "#FFFFFF"
+
+[palettes.sunset]           # warm dusk sky
+red = "#2D0040"
+orange = "#6B1D6E"
+yellow = "#C94277"
+green = "#E86252"
+blue = "#F5A623"
+violet = "#F7DB6E"
+text = "#FFFFFF"
+
+[palettes.forest]           # woodland earth tones
+red = "#2C1810"
+orange = "#5C4033"
+yellow = "#8B7355"
+green = "#6B8E4E"
+blue = "#3A5F3A"
+violet = "#1A3A1A"
+text = "#F5F0E8"
+
+[palettes.cyberpunk]        # neon city nights
+red = "#FF00FF"
+orange = "#00FFFF"
+yellow = "#39FF14"
+green = "#FF1493"
+blue = "#7B00FF"
+violet = "#FFD700"
+text = "#0A0A0A"
+
+[palettes.monochrome]       # clean grayscale
+red = "#E0E0E0"
+orange = "#C0C0C0"
+yellow = "#A0A0A0"
+green = "#808080"
+blue = "#606060"
+violet = "#404040"
+text = "#000000"
+
+[palettes.dracula]          # classic dracula theme
+red = "#FF5555"
+orange = "#FFB86C"
+yellow = "#F1FA8C"
+green = "#50FA7B"
+blue = "#8BE9FD"
+violet = "#BD93F9"
+text = "#282A36"
+
+[palettes.nord]             # arctic frost
+red = "#5E81AC"
+orange = "#81A1C1"
+yellow = "#88C0D0"
+green = "#8FBCBB"
+blue = "#A3BE8C"
+violet = "#B48EAD"
+text = "#2E3440"
+
+[palettes.gruvbox]          # retro earthy tones
+red = "#CC241D"
+orange = "#D65D0E"
+yellow = "#D79921"
+green = "#98971A"
+blue = "#458588"
+violet = "#B16286"
+text = "#1D2021"
+
+[palettes.tokyo-night]      # neon city vibes
+red = "#F7768E"
+orange = "#FF9E64"
+yellow = "#E0AF68"
+green = "#9ECE6A"
+blue = "#7AA2F7"
+violet = "#BB9AF7"
+text = "#1A1B26"
+
+[palettes.berry]            # deep purples and magentas
+red = "#3C1053"
+orange = "#6B2D7B"
+yellow = "#9B59B6"
+green = "#D63384"
+blue = "#E91E8C"
+violet = "#FF69B4"
+text = "#FFFFFF"
+
+[palettes.lava]             # volcanic heat
+red = "#1A0000"
+orange = "#4A0000"
+yellow = "#8B0000"
+green = "#CC3300"
+blue = "#FF6600"
+violet = "#FFCC00"
+text = "#FFFFFF"
+
+[os]
+disabled = false
+style = "bg:red fg:text"
+format = "[ $symbol ]($style)"
+
+[os.symbols]
+Arch = "󰹞"
+Debian = "\U000f0e52"
+Fedora = "\U000f0e5e"
+Linux = ""
+Macos = ""
+Manjaro = ""
+NixOS = "\U000f1105"
+Ubuntu = ""
+Windows = "󰕰"
 
 [directory]
+style = "bg:orange fg:text"
+format = "[ $path ]($style)"
 truncation_length = 3
 truncate_to_repo = true
 
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = " "
+"Pictures" = " "
+"Projects" = " "
+
 [git_branch]
-format = "[$symbol$branch]($style) "
+symbol = ""
+style = "bg:yellow fg:text"
+format = '[$symbol $branch ]($style)'
 
 [git_status]
-format = '([$all_status$ahead_behind]($style) )'
+style = "bg:yellow fg:text"
+format = '[$all_status$ahead_behind ]($style)'
+
+[c]
+symbol = ""
+style = "bg:green fg:text"
+format = '[$symbol ($version) ]($style)'
+
+[golang]
+symbol = ""
+style = "bg:green fg:text"
+format = '[$symbol ($version) ]($style)'
+
+[nodejs]
+symbol = "󰎙"
+style = "bg:green fg:text"
+format = '[$symbol ($version) ]($style)'
+
+[python]
+symbol = ""
+style = "bg:green fg:text"
+format = '[$symbol ($version) ]($style)'
+
+[rust]
+symbol = ""
+style = "bg:green fg:text"
+format = '[$symbol ($version) ]($style)'
+
+[java]
+symbol = ""
+style = "bg:green fg:text"
+format = '[$symbol ($version) ]($style)'
+
+[docker_context]
+symbol = ""
+style = "bg:green fg:text"
+format = '[$symbol $context ]($style)'
+
+[time]
+disabled = false
+style = "bg:blue fg:text"
+time_format = "%H:%M"
+format = '[ 󰥔 $time ]($style)'
 
 [cmd_duration]
-min_time = 2_000
-format = "[$duration]($style) "
+min_time = 1
+style = "bg:violet fg:text"
+format = '[󰔔 $duration ]($style)'
+show_milliseconds = true
 
 [character]
-success_symbol = "[❯](bold green)"
-error_symbol = "[❯](bold red)"
+success_symbol = '[ 󱞩](bold green)'
+error_symbol = '[ 󱞩](bold red)'
