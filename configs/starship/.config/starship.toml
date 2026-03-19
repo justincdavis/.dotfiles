@@ -2,7 +2,7 @@
 # https://starship.rs/config/
 
 add_newline = false
-palette = "pastel"
+palette = "forest"
 
 format = """
 [](red)\
