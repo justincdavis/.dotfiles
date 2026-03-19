@@ -16,6 +16,7 @@ family = "JetBrainsMono Nerd Font"
 style = "Italic"
 
 [window]
+dimensions = { columns = 110, lines = 30 }
 padding = { x = 8, y = 4 }
 dynamic_padding = true
 
